@@ -231,7 +231,7 @@ GOOGLE_CALENDAR_ID=
 GOOGLE_SERVICE_ACCOUNT_JSON=
 APP_ENV=production
 APP_PORT=8000
-BASE_URL=https://your-railway-domain.up.railway.app
+BASE_URL=https://immigration.datawebify.com/
 ```
 
 ---
