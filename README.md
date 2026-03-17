@@ -1,10 +1,8 @@
-# AI Immigration Receptionist
+# AI Immigration Receptionist and Intake Automation System
 
-**Autonomous bilingual AI receptionist system for immigration law firms.**
+**Built by [Datawebify](https://datawebify.com) | [immigration.datawebify.com](https://immigration.datawebify.com) | [GitHub](https://github.com/umair801/immigration_ai_receptionist)**
 
-Handles inbound and outbound calls in English and Spanish, qualifies leads through structured intake conversations, books consultations with payment confirmation, transfers calls to paralegals when needed, and logs every interaction into GoHighLevel — with no human receptionist involvement.
-
-Built by [Datawebify](https://datawebify.com) | [GitHub](https://github.com/umair801) | [Upwork](https://upwork.com/freelancers/umair801)
+A fully autonomous AI receptionist system for immigration law firms. Handles inbound and outbound calls in English and Spanish, qualifies leads through structured intake conversations, books consultations with payment confirmation, transfers calls to paralegals when needed, and logs every interaction into GoHighLevel — without human receptionist involvement.
 
 ---
 
@@ -14,27 +12,14 @@ Built by [Datawebify](https://datawebify.com) | [GitHub](https://github.com/umai
 |---|---|---|---|
 | Call answer rate | 60-70% (missed after hours) | 100% (24/7) | Full coverage |
 | Time to first intake question | 2-5 minutes | Under 10 seconds | 97% faster |
-| Intake completion rate | 50-60% | 85%+ | +30 points |
+| Intake completion rate | 50-60% | 85%+ | +30% |
 | Consultation booking rate | 20-30% of calls | 40-55% of calls | 2x improvement |
 | Staff time on intake calls | 15-20 hrs/week | Near zero | 90% reduction |
 | Lead data in CRM | Inconsistent, manual | 100% automated | Full coverage |
 
 ---
 
-## What It Does
-
-**Inbound calls** are answered instantly by a bilingual AI agent named Sofia. Sofia detects the caller's language, conducts a structured immigration intake conversation, qualifies the lead, books a consultation, sends a Stripe payment link via SMS, and logs the complete interaction into GoHighLevel — all before any staff member is involved.
-
-**Outbound calls** are triggered automatically when a new lead enters GoHighLevel from a Facebook or Instagram form submission. Sofia calls the lead within seconds of form submission, in their preferred language, and runs the same intake and qualification flow as inbound calls.
-
-**Urgent cases** involving detention or imminent court hearings are flagged immediately and transferred to a live attorney with a whispered caller summary delivered before the connection is made.
-
-**Every call** produces a structured CRM record with intake fields, qualification score, attorney brief, appointment details, payment status, call transcript, and pipeline stage update.
-
----
-
 ## System Architecture
-
 ```
 Inbound Call / Social Media Lead
            |
@@ -44,38 +29,36 @@ Inbound Call / Social Media Lead
            |
      ElevenLabs (bilingual TTS)
            |
-   New Lead          Existing Client
-      |                    |
- Intake Agent        Transfer to Paralegal
-      |
- Qualification Agent (GPT-4o)
-      |
- Appointment Setter Agent
-      |
- Payment Confirmation Agent
-      |
- CRM Sync Agent (GoHighLevel)
-      |
- SMS + Calendar Confirmation
+   ┌───────┴────────┐
+   |                |
+New Lead     Existing Client
+   |                |
+Intake Agent   Transfer to
+   |            Paralegal
+   |
+Qualification Agent (GPT-4o)
+   |
+Appointment Setter Agent
+   |
+Payment Confirmation Agent
+   |
+CRM Sync Agent (GoHighLevel)
+   |
+SMS + Calendar Confirmation
 ```
 
 ### Agent Pipeline
 
-**Call Router Agent** — Receives inbound calls via Twilio webhook, detects caller type via GoHighLevel lookup, routes new leads to intake and existing clients to warm transfer.
-
-**Intake Agent** — LangGraph conversation flow collecting name, country of origin, entry date, family status, immigration history, court involvement, and urgency level in English or Spanish.
-
-**Qualification Agent** — GPT-4o lead scoring (0-100) evaluating case complexity, urgency, and firm fit. Detained callers and imminent court hearings trigger immediate escalation.
-
-**Appointment Setter Agent** — Fetches live Google Calendar availability, presents three options to the caller, confirms selection, generates a Stripe payment link, and delivers it via Twilio SMS.
-
-**Payment Confirmation Agent** — Listens for Stripe webhook on payment completion, finalizes the appointment, sends confirmation and 24-hour reminder SMS, and updates GoHighLevel.
-
-**Outbound Caller Agent** — Triggered by GoHighLevel pipeline stage changes or lead form submissions. Runs the full intake and qualification flow on outbound calls.
-
-**Call Transfer Agent** — Executes warm transfers to paralegals or attorneys using Twilio conference logic. Whispers a caller summary to the receiving staff member before connection.
-
-**CRM Sync Agent** — Writes the complete call record to GoHighLevel after every call: intake fields, qualification score, attorney brief, appointment details, payment status, transcript, and pipeline stage.
+| Agent | Responsibility |
+|---|---|
+| Call Router | Detects new vs existing caller via GHL lookup |
+| Intake Agent | Bilingual structured intake in English and Spanish |
+| Qualification Agent | GPT-4o lead scoring 0-100 with urgency escalation |
+| Appointment Setter | Calendar slot presentation and caller selection |
+| Payment Confirmation | Stripe webhook listener, SMS confirmation, reminder |
+| Outbound Caller | Social media lead follow-up within seconds of form submission |
+| Call Transfer | Warm transfer with attorney whisper summary |
+| CRM Sync | Full GoHighLevel write after every call |
 
 ---
 
@@ -84,24 +67,56 @@ Inbound Call / Social Media Lead
 | Layer | Technology |
 |---|---|
 | Agent Framework | LangGraph |
-| AI Model | GPT-4o (OpenAI API) |
+| AI Model | GPT-4o (OpenAI) |
 | Voice Platform | Retell AI |
 | Telephony | Twilio Voice |
-| Voice Synthesis | ElevenLabs (bilingual) |
+| Voice Synthesis | ElevenLabs (English + Spanish) |
 | CRM | GoHighLevel |
 | Calendar | Google Calendar API |
 | Payment | Stripe |
-| Backend API | FastAPI + Uvicorn |
+| Backend | FastAPI + Uvicorn |
 | Database | Supabase (PostgreSQL) |
 | Deployment | Docker + Railway |
 | Language | Python 3.12 |
 
 ---
 
-## Project Structure
+## API Endpoints
 
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/health` | GET | Service health check |
+| `/metrics/` | GET | Live KPI dashboard |
+| `/metrics/summary` | GET | Executive summary report |
+| `/voice/retell-webhook` | POST | Retell AI call events |
+| `/voice/intake-webhook` | POST | Demo intake data receiver |
+| `/voice/trigger-outbound` | POST | GoHighLevel outbound trigger |
+| `/payment/stripe-webhook` | POST | Stripe payment confirmation |
+| `/payment/success` | GET | Post-payment landing page |
+
+---
+
+## Key Features
+
+**Bilingual voice quality.** ElevenLabs voices configured separately for English and Spanish with tuned stability and similarity settings for natural conversational cadence.
+
+**Structured immigration intake.** Eight-question intake flow collecting name, country of origin, entry date, family status, immigration history, court involvement, and detention status. All fields extracted from free-form speech via GPT-4o.
+
+**Deterministic lead scoring.** Qualification scoring uses a weighted model across urgency level, case type, family status, court involvement, and data completeness. Detained callers and imminent court hearings trigger immediate attorney escalation regardless of score.
+
+**Payment-gated appointments.** Consultation slots are held as pending until Stripe confirms payment. Stripe webhook signature verification prevents unauthorized confirmation. Appointments are only finalized in GoHighLevel and Google Calendar after payment lands.
+
+**Warm call transfer with whisper.** Paralegals and attorneys receive a spoken summary of the caller's name, case type, urgency, and escalation reason before the caller is connected. No cold transfers.
+
+**Full CRM automation.** Every call produces a structured GoHighLevel contact record with intake fields, qualification score, attorney brief, outcome tags, and pipeline stage update. Tags drive GoHighLevel email sequences and follow-up tasks automatically.
+
+**Outbound lead response.** Social media leads from Facebook and Instagram trigger outbound calls within seconds of form submission via GoHighLevel webhook. The same intake and qualification pipeline runs on outbound calls.
+
+---
+
+## Project Structure
 ```
-AgAI_9_Immigration_AI_Receptionist/
+immigration_ai_receptionist/
 ├── agents/
 │   ├── call_router_agent.py
 │   ├── intake_agent.py
@@ -117,7 +132,6 @@ AgAI_9_Immigration_AI_Receptionist/
 │   ├── database.py
 │   ├── session_manager.py
 │   ├── models.py
-│   ├── enums.py
 │   └── logger.py
 ├── api/
 │   ├── main.py
@@ -142,49 +156,16 @@ AgAI_9_Immigration_AI_Receptionist/
 ├── railway.json
 ├── requirements.txt
 ├── schema.sql
-├── .env.example
-└── README.md
+└── .env.example
 ```
 
 ---
 
-## API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/voice/retell-webhook` | Retell AI call event receiver |
-| POST | `/voice/intake-webhook` | Demo intake data receiver |
-| POST | `/voice/trigger-outbound` | GoHighLevel outbound call trigger |
-| POST | `/payment/stripe-webhook` | Stripe payment confirmation |
-| GET | `/payment/success` | Post-payment redirect |
-| GET | `/metrics/` | Live KPI dashboard |
-| GET | `/metrics/summary` | Executive summary report |
-| GET | `/metrics/health` | Health and database status |
-| GET | `/health` | Server health check |
-| GET | `/docs` | Interactive API documentation |
-
----
-
-## Metrics Tracked
-
-- Calls received (total, by language)
-- Intake completion rate vs 85% target
-- Consultation booking rate vs 45% target
-- Revenue captured (USD)
-- Hot, warm, and cold lead counts
-- Urgent escalations triggered
-- Human receptionist hours: zero
-
-Live metrics available at `/metrics/` on the deployed instance.
-
----
-
 ## Local Setup
-
 ```bash
 # Clone the repository
 git clone https://github.com/umair801/immigration_ai_receptionist.git
-cd agai9-immigration-ai-receptionist
+cd immigration_ai_receptionist
 
 # Create virtual environment
 python -m venv venv
@@ -196,114 +177,65 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Fill in all API keys in .env
+# Fill in all values in .env
 
 # Apply database schema
-# Run schema.sql in your Supabase SQL Editor
+# Paste schema.sql into Supabase SQL Editor and run
 
 # Start the server
 python main.py
 ```
 
-Server runs at `http://localhost:8000`. API docs at `http://localhost:8000/docs`.
-
 ---
 
 ## Environment Variables
 
-```env
-OPENAI_API_KEY=
-RETELL_API_KEY=
-RETELL_AGENT_ID=
-ELEVENLABS_API_KEY=
-ELEVENLABS_VOICE_ID_EN=
-ELEVENLABS_VOICE_ID_ES=
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-GHL_API_KEY=
-GHL_LOCATION_ID=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-SUPABASE_URL=
-SUPABASE_SERVICE_KEY=
-GOOGLE_CALENDAR_ID=
-GOOGLE_SERVICE_ACCOUNT_JSON=
-APP_ENV=production
-APP_PORT=8000
-BASE_URL=https://immigration.datawebify.com/
+| Variable | Description |
+|---|---|
+| `OPENAI_API_KEY` | GPT-4o API key |
+| `RETELL_API_KEY` | Retell AI API key |
+| `RETELL_AGENT_ID` | Retell agent ID |
+| `ELEVENLABS_API_KEY` | ElevenLabs API key |
+| `ELEVENLABS_VOICE_ID_EN` | English voice ID |
+| `ELEVENLABS_VOICE_ID_ES` | Spanish voice ID |
+| `TWILIO_ACCOUNT_SID` | Twilio account SID |
+| `TWILIO_AUTH_TOKEN` | Twilio auth token |
+| `TWILIO_PHONE_NUMBER` | Twilio phone number |
+| `GHL_API_KEY` | GoHighLevel API key |
+| `GHL_LOCATION_ID` | GoHighLevel location ID |
+| `STRIPE_SECRET_KEY` | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_KEY` | Supabase service role key |
+| `GOOGLE_CALENDAR_ID` | Google Calendar ID |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Path to service account JSON |
+| `BASE_URL` | Public deployment URL |
+
+---
+
+## Test Suite
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
 ```
+
+35 tests across 5 modules covering intake flow, lead qualification,
+call transfer routing, payment confirmation, and CRM sync logic.
 
 ---
 
 ## Deployment
 
-The system deploys to Railway via Docker. After pushing to GitHub:
-
-1. Connect the repository to Railway
-2. Add all environment variables in Railway dashboard
-3. Railway auto-detects the Dockerfile and deploys
-4. Health check confirms live status at `/health`
-5. Update `BASE_URL` in environment variables with the Railway domain
-6. Register the Railway webhook URL in Retell AI dashboard
-7. Register the Stripe webhook endpoint in Stripe dashboard
-
----
-
-## Running Tests
-
+Deployed on Railway via Docker.
+Live at: [immigration.datawebify.com](https://immigration.datawebify.com)
 ```bash
-python -m unittest discover -s tests -p "test_*.py" -v
+# Railway deployment is automatic on push to main
+git push origin main
 ```
 
-35 tests across intake flow, qualification scoring, call transfer routing, payment confirmation, and CRM sync logic.
-
 ---
 
-## Intake Fields Collected
+## Built by Datawebify
 
-- Full name
-- Country of origin
-- US entry date
-- Family member citizenship status
-- Immigration history and reason for calling
-- Court hearing involvement
-- Detention status
-- Preferred language (English or Spanish)
+**Agentic AI solutions for professional services firms.**
 
----
-
-## Lead Qualification Scoring
-
-Leads are scored 0-100 based on urgency level, case type, family status, court involvement, and completeness of intake data.
-
-| Score | Label | Action |
-|---|---|---|
-| 75-100 | Hot | Priority follow-up, immediate booking |
-| 50-74 | Warm | Standard consultation booking |
-| 25-49 | Cold | Nurture sequence triggered in GHL |
-| 0-24 | Unqualified | Tagged and archived |
-
-Detained callers and callers with imminent court hearings bypass scoring and escalate directly to a live attorney regardless of score.
-
----
-
-## Call Transfer Logic
-
-| Condition | Transfer Target |
-|---|---|
-| Detained or critical urgency | Senior Attorney |
-| Spanish-speaking standard lead | Spanish Paralegal |
-| English-speaking standard lead | Default Paralegal Team |
-
-All transfers include a whispered caller summary delivered to the receiving staff member before the caller is connected.
-
----
-
-## Built By
-
-**Muhammad Umair** — Agentic AI Specialist and Enterprise Consultant
-
-[Datawebify](https://datawebify.com) | [GitHub](https://github.com/umair801) | [Upwork](https://upwork.com/freelancers/umair801)
-
-This system is Project 9 in a portfolio of 50 enterprise-grade agentic AI systems built for professional services firms.
+[datawebify.com](https://datawebify.com) | [github.com/umair801/immigration_ai_receptionist](https://github.com/umair801/immigration_ai_receptionist)
